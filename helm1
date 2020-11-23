@@ -1,0 +1,37 @@
+import subprocess
+#import yaml
+import sys
+import time
+import os
+import pprint
+
+def getClusterList():
+  print('Getting Cluster list for the Project={0}'.format(projectId))
+  clusters = []
+  p = subprocess.Popen(['gcloud', 'container', 'clusters', 'list', '--project', projectId], stdout=subprocess.PIPE,
+  stderr = subprocess.PIPE)
+  output, error = p.communicate()
+  if not error:
+    #above command returns bytes type output so using decode to convert
+    allData = output.decode("utf-8").rstrip().split('\n')
+    print(allData)
+    fields = allData[0].split()
+    for i in range(1, len(allData)):
+      cluster = {}
+      row = allData[i].split()
+      for j in range(len(fields)):
+        cluster[fields[j]] = row[j]
+      clusters.append(cluster)
+    return clusters
+
+  else:
+    print('Failed to get cluster list')
+    exit(1)
+if __name__ == '__main__':
+  if len(sys.argv) - 1 != 2:
+    print('Please pass required arguments to the script')
+    print('Usage: python shutdownCluster.py <Project ID> <Cluster Name>')
+    exit(1)
+  projectId = sys.argv[1]
+  clusterName = sys.argv[2]
+  print('Project ID = {0}, Cluster Name = {1}'.format(projectId, clusterName))
